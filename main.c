@@ -339,6 +339,7 @@ int HashDelete(unsigned int TblId, void* pTblmKey,TblPrority* pTblPri,TBL_ELEMEN
 	unsigned int DataLen = 0;
 	TBL_ELEMENT* pTblHashHead = NULL;
 	TBL_ELEMENT* pTblHashNext = NULL;
+	TBL_ELEMENT* pTblHashPre = NULL;
 	if (pTblPriNode == NULL)
 	{
 		return RET_ERR;
@@ -371,10 +372,23 @@ int HashDelete(unsigned int TblId, void* pTblmKey,TblPrority* pTblPri,TBL_ELEMEN
 	{
 		if (memcpy(pTblKey->pKey,pTblHashHead->pEleKey,KeyLen) == 0)
 		{
-			pTblData->len = DataLen;
-			memcpy(pTblData->pData,pTblHashHead->pEleData,DataLen);
+			if(pTblHashHead->pEleData != NULL)
+			{
+				free(pTblHashHead->pEleData->pData);
+				free(pTblHashHead->pEleData);			
+			}
+
+			if(pTblHashHead->pEleKey != NULL)
+			{
+				free(pTblHashHead->pEleKey->pKey);
+				free(pTblHashHead->pEleKey);
+			}
+			pTblHashNext = pTblHashHead->pElemNext;
+			pTblHashPre->pElemNext = pTblHashNext;
+			free(pTblHashHead);
 			return RET_OK;
 		}
+		pTblHashPre = pTblHashHead;
 		pTblHashNext = pTblHashHead->pElemNext;
 		pTblHashHead = pTblHashNext;
 	}	
@@ -790,9 +804,9 @@ int main()
 		return ret;
 	}
 
-	/*add.del.query function: example:寰€TBL_ID_AGE琛ㄤ腑娣诲姞璁板綍:name--age*/
+	/*add.del.query function: example:往TBL_ID_AGE表中添加记录:name--age*/
 /*Add function*/
-	/*绗竴涓汉*/	
+	/*第一个人*/	
 	name = "xiaoming";
 	name_len = strlen(name);
 	age = 20;
@@ -808,7 +822,7 @@ int main()
 		return RET_ERR;
 	}
 	printf("add ok, key=0x%08x,data=0x%08x\n",userA_Key.pKey,userA_Data.pData);
-    /*绗簩涓汉*/
+    /*第二个人*/
 	name = "xiaohong";
 	name_len = strlen(name);
 	age = 21;
@@ -824,7 +838,7 @@ int main()
 		return RET_ERR;
 	}
 	printf("add ok, key=%08x,data=%08x\n",userA_Key.pKey,userA_Data.pData);
-	/*绗笁涓汉*/
+	/*第三个人*/
 	name= "xiaogang";
 	name_len = strlen(name);
 	age = 20;
@@ -896,4 +910,3 @@ int main()
 	printf("delete ok, key=%08x,data=%08x\n",userA_Key.pKey,userA_Data.pData);
 
 }
-
